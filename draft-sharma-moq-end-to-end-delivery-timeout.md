@@ -78,12 +78,19 @@ Parameter defined below unless the extension was negotiated.
 # End-to-End Object Delivery Timeout
 
 The END_TO_END_OBJECT_DELIVERY_TIMEOUT Message Parameter is a variable-length
-integer containing a timeout in milliseconds.  It MAY appear in SUBSCRIBE or
-in REQUEST_UPDATE for a Subscription.  A value of 0 disables the timeout.
+integer containing a timeout in milliseconds.  It MAY appear in SUBSCRIBE,
+SUBSCRIBE_TRACKS, PUBLISH, or a REQUEST_UPDATE that updates a Subscription.  A
+value of 0 disables the timeout.
 
-A publisher MUST NOT accept a non-zero value unless it can compute an Object
-Timestamp for every Normal Object it might forward.  A Normal Object without a
-computable timestamp while the timeout is active makes the Track malformed.
+When included in SUBSCRIBE_TRACKS, the parameter is the initial value for each
+resulting Subscription and is copied into PUBLISH as specified in {{MOQT}}.  A
+publisher MUST send PUBLISH_SKIPPED instead of PUBLISH for a Track that cannot
+provide the timestamps required by this extension.
+
+A publisher MUST NOT establish a Subscription with a non-zero value unless it
+can compute an Object Timestamp for every Normal Object it might forward.  A
+Normal Object without a computable timestamp while the timeout is active makes
+the Track malformed.
 
 For each Subscription with a non-zero timeout, the publisher maintains a
 reference timestamp and a reference time.  Immediately before forwarding the
