@@ -1230,39 +1230,45 @@ Parameter defined below unless the extension was negotiated.<a href="#section-3-
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-end-to-end-object-delivery-" class="section-name selfRef">End-to-End Object Delivery Timeout</a>
       </h2>
 <p id="section-4-1">The END_TO_END_OBJECT_DELIVERY_TIMEOUT Message Parameter is a variable-length
-integer containing a timeout in milliseconds.  It <span class="bcp14">MAY</span> appear in SUBSCRIBE or
-in REQUEST_UPDATE for a Subscription.  A value of 0 disables the timeout.<a href="#section-4-1" class="pilcrow">¶</a></p>
-<p id="section-4-2">A publisher <span class="bcp14">MUST NOT</span> accept a non-zero value unless it can compute an Object
-Timestamp for every Normal Object it might forward.  A Normal Object without a
-computable timestamp while the timeout is active makes the Track malformed.<a href="#section-4-2" class="pilcrow">¶</a></p>
-<p id="section-4-3">For each Subscription with a non-zero timeout, the publisher maintains a
+integer containing a timeout in milliseconds.  It <span class="bcp14">MAY</span> appear in SUBSCRIBE,
+SUBSCRIBE_TRACKS, PUBLISH, or a REQUEST_UPDATE that updates a Subscription.  A
+value of 0 disables the timeout.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">When included in SUBSCRIBE_TRACKS, the parameter is the initial value for each
+resulting Subscription and is copied into PUBLISH as specified in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>.  A
+publisher <span class="bcp14">MUST</span> send PUBLISH_SKIPPED instead of PUBLISH for a Track that cannot
+provide the timestamps required by this extension.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">A publisher <span class="bcp14">MUST NOT</span> establish a Subscription with a non-zero value unless it
+can compute an Object Timestamp for every Normal Object it might forward.  A
+Normal Object without a computable timestamp while the timeout is active makes
+the Track malformed.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">For each Subscription with a non-zero timeout, the publisher maintains a
 reference timestamp and a reference time.  Immediately before forwarding the
 first Normal Object after the timeout is enabled, it records the Object's
 timestamp as the reference timestamp and its local monotonic time as the
-reference time.  That Object is not expired by this extension.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">For a later Object with timestamp <code>T</code>, the publisher computes its deadline as:<a href="#section-4-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4-5">
+reference time.  That Object is not expired by this extension.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">For a later Object with timestamp <code>T</code>, the publisher computes its deadline as:<a href="#section-4-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4-6">
 <pre>
 deadline = reference_time
          + (T - reference_timestamp) / timescale
          + timeout
-</pre><a href="#section-4-5" class="pilcrow">¶</a>
+</pre><a href="#section-4-6" class="pilcrow">¶</a>
 </div>
-<p id="section-4-6">Conversions between ticks and time <span class="bcp14">MUST NOT</span> make the deadline earlier.  If the
+<p id="section-4-7">Conversions between ticks and time <span class="bcp14">MUST NOT</span> make the deadline earlier.  If the
 publisher's current time is later than the deadline, it <span class="bcp14">MUST</span> apply the
 expiration behavior specified for OBJECT_DELIVERY_TIMEOUT in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>.  This
-comparison applies across all Subgroups in the Subscription.<a href="#section-4-6" class="pilcrow">¶</a></p>
-<p id="section-4-7">Changing one non-zero timeout to another preserves the reference.  Disabling
+comparison applies across all Subgroups in the Subscription.<a href="#section-4-7" class="pilcrow">¶</a></p>
+<p id="section-4-8">Changing one non-zero timeout to another preserves the reference.  Disabling
 the timeout clears the reference; enabling it again establishes a new reference
-with the next Normal Object.<a href="#section-4-7" class="pilcrow">¶</a></p>
-<p id="section-4-8">For example, if the reference Object has timestamp 10 seconds and a later
+with the next Normal Object.<a href="#section-4-8" class="pilcrow">¶</a></p>
+<p id="section-4-9">For example, if the reference Object has timestamp 10 seconds and a later
 Object has timestamp 12 seconds, a 500 millisecond timeout expires the later
-Object 2.5 seconds after the reference Object was forwarded.<a href="#section-4-8" class="pilcrow">¶</a></p>
-<p id="section-4-9">This timeout is independent of OBJECT_DELIVERY_TIMEOUT and
+Object 2.5 seconds after the reference Object was forwarded.<a href="#section-4-9" class="pilcrow">¶</a></p>
+<p id="section-4-10">This timeout is independent of OBJECT_DELIVERY_TIMEOUT and
 SUBGROUP_DELIVERY_TIMEOUT; the first applicable timeout to expire determines
 the result.  As with all Message Parameters, a Relay <span class="bcp14">MUST NOT</span> copy this
 parameter to an upstream request.  The local timestamp comparison already
-includes delay accumulated upstream.<a href="#section-4-9" class="pilcrow">¶</a></p>
+includes delay accumulated upstream.<a href="#section-4-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="limitations">
